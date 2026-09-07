@@ -1,0 +1,4 @@
+REQUEST messages: [{"role":"system","content":"You are a concise assistant."},{"role":"user","content":"Say hello in one sentence."}]
+RESPONSE: {"id":"chatcmpl_demo","object":"chat.completion","choices":[{"index":0,"message":{"role":"assistant","content":"Hello from the chat model."},"finish_reason":"stop"}],"usage":{"prompt_tokens":18,"completion_tokens":6,"total_tokens":24}}
+USAGE: {"prompt_tokens":18,"completion_tokens":6,"total_tokens":24}
+Hello from the chat model.
