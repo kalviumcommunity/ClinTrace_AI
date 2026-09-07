@@ -1,0 +1,32 @@
+Token-counting sample results
+
+Command: py scripts/token_cost_estimator.py
+Tokenizer: cl100k_base
+Rates: input=$0.0005/1K tokens, output=$0.0015/1K tokens
+
+short question
+  input: chars=41, words=7, tokens=9
+  output: tokens=7
+  input token/char ratio=0.220
+  estimated cost=$0.000015
+
+clinical paragraph
+  input: chars=174, words=24, tokens=29
+  output: tokens=19
+  input token/char ratio=0.167
+  estimated cost=$0.000043
+
+full workflow document
+  input: chars=521, words=77, tokens=94
+  output: tokens=23
+  input token/char ratio=0.180
+  estimated cost=$0.000082
+
+Corpus total
+  input tokens=132
+  output tokens=49
+  estimated cost=$0.000140
+
+The input token/character ratios differ across samples (0.220, 0.167, and
+0.180), demonstrating that text length and token count track together without
+being exactly proportional.
