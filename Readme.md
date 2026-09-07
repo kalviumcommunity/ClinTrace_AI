@@ -10,4 +10,3 @@ The backend makes one chat completion request through the OpenAI-compatible API 
 
 The script logs the request messages, complete response payload, and token usage, then prints `choices[0].message.content`. Authentication failures (401) and rate limits or quota failures (429) are reported with human-readable messages.
 
-The sanitized successful exchange is captured in [backend/sample-output.txt](backend/sample-output.txt). It uses a local OpenAI-compatible mock response so no secret is required to reproduce the validation.
