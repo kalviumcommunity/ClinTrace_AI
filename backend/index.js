@@ -2,46 +2,45 @@ require("dotenv").config();
 
 const OpenAI = require("openai");
 
-const model = process.env.CHAT_MODEL;
-const apiKey = process.env.OPENAI_API_KEY;
-const baseURL = process.env.OPENAI_BASE_URL;
+const messages = [
+  { role: "system", content: "You are a concise assistant." },
+  { role: "user", content: "Say hello in one sentence." },
+];
 
-function getMissingConfiguration() {
-  const missing = [];
+function getRequiredEnvironment() {
+  const missing = ["OPENAI_API_KEY", "CHAT_MODEL"].filter(
+    (name) => !process.env[name],
+  );
 
-  if (!apiKey) {
-    missing.push("OPENAI_API_KEY");
+  if (missing.length > 0) {
+    throw new Error(
+      `Missing required environment variable(s): ${missing.join(", ")}`,
+    );
   }
-  if (!model) {
-    missing.push("CHAT_MODEL");
-  }
 
-  return missing;
+  return {
+    apiKey: process.env.OPENAI_API_KEY,
+    baseURL: process.env.OPENAI_BASE_URL,
+    model: process.env.CHAT_MODEL,
+  };
 }
 
 async function runFirstCompletion() {
-  const missing = getMissingConfiguration();
-  if (missing.length > 0) {
-    throw new Error(`Missing required environment variable(s): ${missing.join(", ")}`);
-  }
-
+  const { apiKey, baseURL, model } = getRequiredEnvironment();
   const client = new OpenAI({
     apiKey,
     ...(baseURL ? { baseURL } : {}),
   });
-  const messages = [
-    { role: "system", content: "You are a concise assistant." },
-    { role: "user", content: "Say hello in one sentence." },
-  ];
 
-  console.info("REQUEST: %j", { model, messages });
+  console.info("REQUEST messages: %j", messages);
 
   try {
     const response = await client.chat.completions.create({ model, messages });
-    const content = response.choices[0]?.message?.content;
+    const reply = response.choices[0]?.message?.content;
 
-    console.info("RESPONSE: %s", content ?? "<no text returned>");
+    console.info("RESPONSE: %j", response);
     console.info("USAGE: %j", response.usage ?? null);
+    console.log(reply ?? "<no text returned>");
 
     return response;
   } catch (error) {
