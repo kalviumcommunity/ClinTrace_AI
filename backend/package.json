@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node index.js",
     "prompt:compare": "node prompt-comparison.js",
+    "params:compare": "node model-parameters.js",
     "embed:corpus": "node embed-corpus.js",
     "embedding:sanity": "node embedding-sanity-check.js",
     "test": "node --test"
