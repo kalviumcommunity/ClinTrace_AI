@@ -1,0 +1,19 @@
+{
+  "documents": [
+    {
+      "id": "clinical-a",
+      "before": "Clinical Research Portal\nPage 1 of 2\n\nCaf\u00e9\u00a0  study\ninter-\nnational   trial\n\n\nBack to top",
+      "after": "Café study\ninternational trial"
+    },
+    {
+      "id": "clinical-b",
+      "before": "Clinical Research Portal\nPage 2 of 2\n\nCaf\u00e9\u00a0  study\ninter-\nnational   trial\n\n\nBack to top",
+      "after": "Café study\ninternational trial"
+    }
+  ],
+  "evidence": {
+    "same_cleaner_applied_to": ["clinical-a", "clinical-b"],
+    "removed": ["Clinical Research Portal", "Page X of Y", "Back to top"],
+    "normalized": ["non-breaking space", "broken word wrap", "repeated blank lines"]
+  }
+}

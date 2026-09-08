@@ -15,3 +15,13 @@ npm test
 ```
 
 The checked-in [sample-parsed-results.json](sample-parsed-results.json) records valid, malformed-then-recovered, and missing-field cases for the assignment walkthrough.
+
+## Corpus text cleaning
+
+`text-cleaning.js` applies one deterministic pipeline to every document through `cleanCorpus`:
+
+1. Normalize Unicode with NFKC and remove common encoding artifacts.
+2. Normalize line endings, whitespace, broken hyphenated line wraps, and blank lines.
+3. Remove page markers, navigation lines, and short lines repeated across the corpus.
+
+The checked-in [cleaning-sample-output.json](cleaning-sample-output.json) shows before/after evidence for two documents and records that both received the same cleaner. Run `npm test` to verify the pipeline.
