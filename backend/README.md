@@ -31,3 +31,7 @@ The checked-in [cleaning-sample-output.json](cleaning-sample-output.json) shows 
 Copy `.env.example` to `.env` and set `OPENAI_API_KEY`, `EMBEDDING_MODEL`, and optionally `OPENAI_BASE_URL` or `EMBEDDING_DIMENSIONS`. Run `npm run embed:corpus` to send the prepared chunks to the OpenAI-compatible embeddings API. The script stores each complete vector with its source text and retrieval metadata, validates that all vectors have one dimension, and prints the chunk count, vector length, and trimmed vector previews.
 
 The checked-in [embedding-sample-output.json](embedding-sample-output.json) records the same two source chunks and metadata with a 1536-dimensional compatible API response. The preview is trimmed for readability; production records retain the complete vector returned by the API.
+
+## Embedding sanity checks
+
+Run `npm run embedding:sanity` to rank the known fixture chunks with cosine similarity and write [embedding-sanity-report.json](embedding-sanity-report.json). The report contains four known query-source tests, ranked sources, scores, pass/failure counts, and a deliberately mixed-topic borderline case. That failure is useful: it shows that a small corpus can produce an ambiguous vector, so retrieval should be improved with richer chunks or query decomposition before trusting it broadly.

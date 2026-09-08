@@ -1,0 +1,49 @@
+{
+  "chunks": [
+    {
+      "text": "Consent is required before a patient record can be indexed.",
+      "metadata": { "source_document": "intake-policy.md", "chunk_index": 0, "section": "Consent" },
+      "embedding": [0.99, 0.05, 0]
+    },
+    {
+      "text": "Invoices are generated monthly for active subscriptions.",
+      "metadata": { "source_document": "billing-policy.md", "chunk_index": 0, "section": "Invoices" },
+      "embedding": [0.05, 0.99, 0]
+    },
+    {
+      "text": "Discharge summaries are reviewed after the patient leaves care.",
+      "metadata": { "source_document": "discharge-guide.md", "chunk_index": 0, "section": "Discharge" },
+      "embedding": [0, 0.05, 0.99]
+    }
+  ],
+  "queries": [
+    {
+      "id": "consent-query",
+      "text": "What is required before indexing a patient record?",
+      "embedding": [0.98, 0.1, 0],
+      "expected_source": "intake-policy.md",
+      "note": "Clear single-topic relevance case."
+    },
+    {
+      "id": "billing-query",
+      "text": "When are subscription invoices generated?",
+      "embedding": [0.1, 0.98, 0],
+      "expected_source": "billing-policy.md",
+      "note": "Clear single-topic relevance case."
+    },
+    {
+      "id": "discharge-query",
+      "text": "What happens after a patient leaves care?",
+      "embedding": [0.1, 0.1, 0.98],
+      "expected_source": "discharge-guide.md",
+      "note": "Clear single-topic relevance case."
+    },
+    {
+      "id": "mixed-consent-billing-query",
+      "text": "How does consent relate to account processing?",
+      "embedding": [0.62, 0.65, 0],
+      "expected_source": "intake-policy.md",
+      "note": "Borderline case: the mixed-topic vector ranks billing above consent, revealing that this tiny fixture needs richer training data or query decomposition."
+    }
+  ]
+}
