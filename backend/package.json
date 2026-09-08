@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node index.js",
     "prompt:compare": "node prompt-comparison.js",
-    "test": "node --check index.js && node --check prompt-comparison.js"
+    "embed:corpus": "node embed-corpus.js",
+    "test": "node --test"
   },
   "keywords": [],
   "author": "",

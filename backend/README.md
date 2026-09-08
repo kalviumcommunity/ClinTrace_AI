@@ -25,3 +25,9 @@ The checked-in [sample-parsed-results.json](sample-parsed-results.json) records 
 3. Remove page markers, navigation lines, and short lines repeated across the corpus.
 
 The checked-in [cleaning-sample-output.json](cleaning-sample-output.json) shows before/after evidence for two documents and records that both received the same cleaner. Run `npm test` to verify the pipeline.
+
+## Embedding a prepared corpus
+
+Copy `.env.example` to `.env` and set `OPENAI_API_KEY`, `EMBEDDING_MODEL`, and optionally `OPENAI_BASE_URL` or `EMBEDDING_DIMENSIONS`. Run `npm run embed:corpus` to send the prepared chunks to the OpenAI-compatible embeddings API. The script stores each complete vector with its source text and retrieval metadata, validates that all vectors have one dimension, and prints the chunk count, vector length, and trimmed vector previews.
+
+The checked-in [embedding-sample-output.json](embedding-sample-output.json) records the same two source chunks and metadata with a 1536-dimensional compatible API response. The preview is trimmed for readability; production records retain the complete vector returned by the API.
