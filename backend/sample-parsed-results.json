@@ -1,0 +1,35 @@
+[
+  {
+    "case": "valid",
+    "input": "{\"answer\":\"RAG retrieves context before generating an answer.\",\"source\":\"docs/rag.md\"}",
+    "result": {
+      "ok": true,
+      "data": {
+        "answer": "RAG retrieves context before generating an answer.",
+        "source": "docs/rag.md"
+      },
+      "recovered": false
+    }
+  },
+  {
+    "case": "malformed-then-recovered",
+    "input": "Here is the result:\n```json\n{\"answer\":\"Use retrieved context.\",\"source\":\"guide.md\"}\n```",
+    "result": {
+      "ok": true,
+      "data": {
+        "answer": "Use retrieved context.",
+        "source": "guide.md"
+      },
+      "recovered": true
+    }
+  },
+  {
+    "case": "missing-required-field",
+    "input": "{\"answer\":\"An answer without a citation\"}",
+    "result": {
+      "ok": false,
+      "error": "Validation failed: missing required field(s): source",
+      "recovered": false
+    }
+  }
+]
