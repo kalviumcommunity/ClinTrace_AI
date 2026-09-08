@@ -25,3 +25,7 @@ The checked-in [scripts/token-chunking-sample-output.json](scripts/token-chunkin
 ## Model parameters & output control
 
 Run `npm run params:compare --prefix backend` after configuring `backend/.env` to send the same grounded prompt with different `temperature`, `max_tokens`, and `stop` settings. The script prints each request's parameters, output, finish reason, and token usage. The checked-in [backend/model-parameters-sample.txt](backend/model-parameters-sample.txt) records the comparison and the recommended settings for a factual RAG answer: low temperature, a task-sized output cap, and an optional stop sequence only when its boundary is reliable.
+
+## Prompt templates & reusable prompt design
+
+The shared template lives in [backend/prompts/answer.js](backend/prompts/answer.js), separate from application logic. It defines named `{context}` and `{question}` placeholders and a renderer for runtime values. The chat history path and prompt-comparison batch feature both reuse it; [backend/prompt-template-sample.txt](backend/prompt-template-sample.txt) shows the template and two filled renders.

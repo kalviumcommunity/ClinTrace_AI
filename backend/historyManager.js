@@ -1,11 +1,15 @@
 // backend/historyManager.js
 const { getEncoding } = require('js-tiktoken');
+const {
+    GROUNDING_SYSTEM_PROMPT,
+    renderAnswerPrompt,
+} = require('./prompts/answer');
 
 const tokenizer = getEncoding("cl100k_base");
 
 const SYSTEM_PROMPT = {
     role: "system",
-    content: "You are ClinTrace AI. Answer medical queries based ONLY on the retrieved clinical protocols. If you do not have enough information, explicitly state: 'I do not have enough information to answer this based on current protocols.' Do not hallucinate or guess."
+    content: GROUNDING_SYSTEM_PROMPT
 };
 
 function calculateTokenCount(messages) {
@@ -33,13 +37,13 @@ function trimMessageHistory(messages, maxTokens = 3000) {
     return messages;
 }
 
-function prepareMessagesForLLM(userQuery, previousHistory = [], maxContextTokens = 3000) {
+function prepareMessagesForLLM(userQuery, previousHistory = [], maxContextTokens = 3000, retrievedContext = "No retrieved context was provided.") {
     const messages = [
         SYSTEM_PROMPT,
         ...previousHistory,
-        { role: "user", content: userQuery }
+        { role: "user", content: renderAnswerPrompt({ context: retrievedContext, question: userQuery }) }
     ];
     return trimMessageHistory(messages, maxContextTokens);
 }
 
-module.exports = { prepareMessagesForLLM };
+module.exports = { prepareMessagesForLLM, SYSTEM_PROMPT };
