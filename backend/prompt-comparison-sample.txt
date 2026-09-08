@@ -1,0 +1,12 @@
+REQUEST [Vague prompt]: [{"role":"system","content":"You are a support assistant for an internal company documentation tool. Answer only questions about company policies described in the supplied context. Be factual, professional, and concise: use no more than two sentences. If the context does not contain the answer, say: I don't know based on the available documentation."},{"role":"user","content":"Documentation excerpt: Eligible customers may request a refund within 30 days of purchase. Refund requests are reviewed against the policy requirements.\n\nExplain our refund policy."}]
+RESPONSE [Vague prompt]: {"choices":[{"message":{"role":"assistant","content":"Our refund policy allows eligible customers to request a refund within 30 days of purchase. Requests are reviewed according to the policy requirements."}}],"usage":{"prompt_tokens":72,"completion_tokens":21,"total_tokens":93}}
+Vague prompt: Our refund policy allows eligible customers to request a refund within 30 days of purchase. Requests are reviewed according to the policy requirements.
+
+REQUEST [Clear constrained prompt]: [{"role":"system","content":"You are a support assistant for an internal company documentation tool. Answer only questions about company policies described in the supplied context. Be factual, professional, and concise: use no more than two sentences. If the context does not contain the answer, say: I don't know based on the available documentation."},{"role":"user","content":"Documentation excerpt: Eligible customers may request a refund within 30 days of purchase. Refund requests are reviewed against the policy requirements.\n\nIn one sentence, state the refund window in days. If the documentation does not give a number, say that you don't know."}]
+RESPONSE [Clear constrained prompt]: {"choices":[{"message":{"role":"assistant","content":"The refund window is 30 days from purchase."}}],"usage":{"prompt_tokens":82,"completion_tokens":10,"total_tokens":92}}
+Clear constrained prompt: The refund window is 30 days from purchase.
+
+PROMPT COMPARISON
+Vague prompt: Our refund policy allows eligible customers to request a refund within 30 days of purchase. Requests are reviewed according to the policy requirements.
+Clear constrained prompt: The refund window is 30 days from purchase.
+Chosen prompt: Clear constrained prompt. It names the task, requires a one-sentence answer in days, and defines the fallback when the documentation is insufficient.

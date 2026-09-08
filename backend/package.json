@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "node --test"
+    "start": "node index.js",
+    "prompt:compare": "node prompt-comparison.js",
+    "test": "node --check index.js && node --check prompt-comparison.js"
   },
   "keywords": [],
   "author": "",
@@ -12,6 +14,7 @@
   "dependencies": {
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "openai": "^6.1.0"
   }
 }
