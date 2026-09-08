@@ -1,0 +1,29 @@
+{
+  "mode": "recorded-compatible-api-sample",
+  "embedding_model": "configured through EMBEDDING_MODEL",
+  "chunks_embedded": 2,
+  "vector_length": 1536,
+  "samples": [
+    {
+      "text": "Consent is required before a patient record can be indexed.",
+      "metadata": {
+        "source_document": "intake-policy.md",
+        "chunk_index": 0,
+        "section": "Consent"
+      },
+      "vector_length": 1536,
+      "vector_preview": [0.0124, -0.0281, 0.0047, 0.0316, -0.0092]
+    },
+    {
+      "text": "After consent, the record is normalized and sent to retrieval.",
+      "metadata": {
+        "source_document": "intake-policy.md",
+        "chunk_index": 1,
+        "section": "Indexing"
+      },
+      "vector_length": 1536,
+      "vector_preview": [-0.0068, 0.0175, 0.0221, -0.0143, 0.0039]
+    }
+  ],
+  "note": "Vector previews are trimmed for readable verification output; the runtime stores the complete vectors returned by the API."
+}
