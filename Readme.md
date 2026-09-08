@@ -29,3 +29,7 @@ Run `npm run params:compare --prefix backend` after configuring `backend/.env` t
 ## Prompt templates & reusable prompt design
 
 The shared template lives in [backend/prompts/answer.js](backend/prompts/answer.js), separate from application logic. It defines named `{context}` and `{question}` placeholders and a renderer for runtime values. The chat history path and prompt-comparison batch feature both reuse it; [backend/prompt-template-sample.txt](backend/prompt-template-sample.txt) shows the template and two filled renders.
+
+## Document loading & multi-format intake
+
+Run `py scripts/document_loader.py data --output scripts/document-loading-report.json` to recursively load PDF, TXT, Markdown, and HTML files into plain-text records. Each loaded record keeps its filename, path, format, and text; unreadable or unsupported files are recorded in `skipped` so one bad document does not stop the corpus. The command reports character counts and an 80-character sample for intake verification. Install dependencies with `py -m pip install -r requirements-token-counting.txt`. The checked-in [scripts/document-loading-sample-output.json](scripts/document-loading-sample-output.json) shows the expected loaded and skipped report shape.
