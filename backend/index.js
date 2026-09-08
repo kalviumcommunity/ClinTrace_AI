@@ -1,65 +1,41 @@
-require("dotenv").config();
+// backend/index.js
+require('dotenv').config();
+const express = require('express');
+const { prepareMessagesForLLM } = require('./historyManager');
 
-const OpenAI = require("openai");
+const app = express();
+app.use(express.json());
 
-const messages = [
-  { role: "system", content: "You are a concise assistant." },
-  { role: "user", content: "Say hello in one sentence." },
-];
+// Mock LLM API call for testing the payload
+app.post('/api/chat', async (req, res) => {
+    try {
+        const { query, history } = req.body;
 
-function getRequiredEnvironment() {
-  const missing = ["OPENAI_API_KEY", "CHAT_MODEL"].filter(
-    (name) => !process.env[name],
-  );
+        if (!query) {
+            return res.status(400).json({ error: "Query is required" });
+        }
 
-  if (missing.length > 0) {
-    throw new Error(
-      `Missing required environment variable(s): ${missing.join(", ")}`,
-    );
-  }
+        // 1. Process the history and query to ensure it fits the token limit
+        // We set a small limit (e.g., 50 tokens) here just to test the trimming logic
+        const safePayload = prepareMessagesForLLM(query, history || [], 3000);
 
-  return {
-    apiKey: process.env.OPENAI_API_KEY,
-    baseURL: process.env.OPENAI_BASE_URL,
-    model: process.env.CHAT_MODEL,
-  };
-}
+        // 2. Log the payload to verify the system prompt is intact and old history is trimmed
+        console.log("Final Payload to LLM:", JSON.stringify(safePayload, null, 2));
 
-async function runFirstCompletion() {
-  const { apiKey, baseURL, model } = getRequiredEnvironment();
-  const client = new OpenAI({
-    apiKey,
-    ...(baseURL ? { baseURL } : {}),
-  });
+        // 3. (Future Step) Send safePayload to OpenAI/Anthropic API here
+        
+        res.json({ 
+            message: "Context window managed successfully.",
+            payloadSentToModel: safePayload
+        });
 
-  console.info("REQUEST messages: %j", messages);
-
-  try {
-    const response = await client.chat.completions.create({ model, messages });
-    const reply = response.choices[0]?.message?.content;
-
-    console.info("RESPONSE: %j", response);
-    console.info("USAGE: %j", response.usage ?? null);
-    console.log(reply ?? "<no text returned>");
-
-    return response;
-  } catch (error) {
-    if (error instanceof OpenAI.AuthenticationError) {
-      throw new Error("Auth failed (401): check OPENAI_API_KEY in your .env");
+    } catch (error) {
+        console.error("Error processing chat:", error);
+        res.status(500).json({ error: "Internal server error" });
     }
-    if (error instanceof OpenAI.RateLimitError) {
-      throw new Error("Rate limited (429): slow down and retry with backoff");
-    }
+});
 
-    throw new Error(`Chat completion failed: ${error.message}`);
-  }
-}
-
-if (require.main === module) {
-  runFirstCompletion().catch((error) => {
-    console.error(error.message);
-    process.exitCode = 1;
-  });
-}
-
-module.exports = { runFirstCompletion };
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
