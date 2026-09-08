@@ -35,3 +35,7 @@ The checked-in [embedding-sample-output.json](embedding-sample-output.json) reco
 ## Embedding sanity checks
 
 Run `npm run embedding:sanity` to rank the known fixture chunks with cosine similarity and write [embedding-sanity-report.json](embedding-sanity-report.json). The report contains four known query-source tests, ranked sources, scores, pass/failure counts, and a deliberately mixed-topic borderline case. That failure is useful: it shows that a small corpus can produce an ambiguous vector, so retrieval should be improved with richer chunks or query decomposition before trusting it broadly.
+
+## Top-k retrieval
+
+Run `npm run retrieve:query` to embed a user query with the configured `EMBEDDING_MODEL`, search the vector store, and return ranked chunks with scores, source text, and metadata. The demo runs the same query with `k=1` and `k=2`; [retrieval-sample-output.json](retrieval-sample-output.json) shows how the second result appears as `k` increases. The runtime rejects a query model that differs from the model recorded for the document store.

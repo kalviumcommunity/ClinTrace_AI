@@ -8,6 +8,7 @@
     "prompt:compare": "node prompt-comparison.js",
     "embed:corpus": "node embed-corpus.js",
     "embedding:sanity": "node embedding-sanity-check.js",
+    "retrieve:query": "node vector-store-retrieval.js",
     "test": "node --test"
   },
   "keywords": [],

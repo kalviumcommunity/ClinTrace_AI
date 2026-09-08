@@ -1,0 +1,48 @@
+{
+  "query": "What is required before indexing a patient record?",
+  "embedding_model": "configured through EMBEDDING_MODEL",
+  "query_vector_length": 3,
+  "runs": [
+    {
+      "k": 1,
+      "results": [
+        {
+          "rank": 1,
+          "score": 0.998688,
+          "text": "Consent is required before a patient record can be indexed.",
+          "metadata": {
+            "source_document": "intake-policy.md",
+            "chunk_index": 0,
+            "section": "Consent"
+          }
+        }
+      ]
+    },
+    {
+      "k": 2,
+      "results": [
+        {
+          "rank": 1,
+          "score": 0.998688,
+          "text": "Consent is required before a patient record can be indexed.",
+          "metadata": {
+            "source_document": "intake-policy.md",
+            "chunk_index": 0,
+            "section": "Consent"
+          }
+        },
+        {
+          "rank": 2,
+          "score": 0.151565,
+          "text": "Invoices are generated monthly for active subscriptions.",
+          "metadata": {
+            "source_document": "billing-policy.md",
+            "chunk_index": 0,
+            "section": "Invoices"
+          }
+        }
+      ]
+    }
+  ],
+  "note": "The sample uses the same stored-vector shape as the embedding pipeline; a live run embeds the query through the configured OpenAI-compatible API before searching the vector store."
+}
