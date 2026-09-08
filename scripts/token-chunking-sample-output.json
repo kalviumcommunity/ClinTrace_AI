@@ -1,0 +1,60 @@
+{
+  "encoding": "cl100k_base",
+  "settings": {
+    "chunk_size_tokens": 512,
+    "overlap_tokens": 64,
+    "overlap_ratio": 0.125
+  },
+  "sample_token_count": 40,
+  "chunk_count": 1,
+  "chunks": [
+    {
+      "index": 0,
+      "start_token": 0,
+      "end_token": 40,
+      "text": "The intake workflow validates the patient identity before retrieval. The most important boundary detail is that a missing consent form stops processing before any document is indexed. After validation, the approved record is normalized and embedded."
+    }
+  ],
+  "boundary_demo": {
+    "without_overlap": [
+      {
+        "index": 0,
+        "start_token": 0,
+        "end_token": 16,
+        "text": "The intake workflow validates the patient identity before retrieval. The most important boundary detail is"
+      },
+      {
+        "index": 1,
+        "start_token": 16,
+        "end_token": 32,
+        "text": " that a missing consent form stops processing before any document is indexed. After validation,"
+      },
+      {
+        "index": 2,
+        "start_token": 32,
+        "end_token": 40,
+        "text": " the approved record is normalized and embedded."
+      }
+    ],
+    "with_overlap": [
+      {
+        "index": 0,
+        "start_token": 0,
+        "end_token": 16,
+        "text": "The intake workflow validates the patient identity before retrieval. The most important boundary detail is"
+      },
+      {
+        "index": 1,
+        "start_token": 12,
+        "end_token": 28,
+        "text": " important boundary detail is that a missing consent form stops processing before any document is indexed"
+      },
+      {
+        "index": 2,
+        "start_token": 24,
+        "end_token": 40,
+        "text": " any document is indexed. After validation, the approved record is normalized and embedded."
+      }
+    ]
+  }
+}

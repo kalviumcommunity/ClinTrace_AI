@@ -15,3 +15,9 @@ The script logs the request messages, complete response payload, and token usage
 Run `npm run prompt:compare --prefix backend` to compare two prompts for the same refund-policy task. The system message defines the assistant's role, policy scope, concise professional tone, and fallback phrase. Each request keeps that system message separate from its user message, which contains the policy excerpt and the question.
 
 The vague variation asks to explain the policy generally. The chosen constrained variation asks for the refund window in days, limits the answer to one sentence, and states what to say when the documentation has no number. The comparison and example outputs are captured in [backend/prompt-comparison-sample.txt](backend/prompt-comparison-sample.txt).
+
+## Token-aware chunking
+
+Run `py scripts/token_chunker.py` to create token-sized retrieval chunks using the `cl100k_base` tokenizer. The configured chunk size is 512 tokens with 64-token overlap. This is conservative for an 8K-class chat context: five retrieved chunks use at most 2,560 content tokens before the prompt and answer, while the 12.5% overlap preserves boundary context without repeating most of each chunk.
+
+The checked-in [scripts/token-chunking-sample-output.json](scripts/token-chunking-sample-output.json) records chunk counts, token ranges, example chunks, and a boundary comparison with and without overlap. Run `py -m unittest scripts/test_token_chunker.py` to verify token sizing and overlap behavior.
