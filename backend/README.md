@@ -36,6 +36,10 @@ The checked-in [embedding-sample-output.json](embedding-sample-output.json) reco
 
 Run `npm run embedding:sanity` to rank the known fixture chunks with cosine similarity and write [embedding-sanity-report.json](embedding-sanity-report.json). The report contains four known query-source tests, ranked sources, scores, pass/failure counts, and a deliberately mixed-topic borderline case. That failure is useful: it shows that a small corpus can produce an ambiguous vector, so retrieval should be improved with richer chunks or query decomposition before trusting it broadly.
 
+## Top-k retrieval
+
+Run `npm run retrieve:query` to embed a user query with the configured `EMBEDDING_MODEL`, search the vector store, and return ranked chunks with scores, source text, and metadata. The demo runs the same query with `k=1` and `k=2`; [retrieval-sample-output.json](retrieval-sample-output.json) shows how the second result appears as `k` increases. The runtime rejects a query model that differs from the model recorded for the document store.
+
 ## Model parameters & output control
 
 Run `npm run params:compare` to compare the same grounded prompt at `temperature=0` and `temperature=1.2`, with short and large `max_tokens` caps, and with a `stop` sequence. Every result includes the parameters sent, output text, `finish_reason`, and token usage. The checked-in [model-parameters-sample.txt](model-parameters-sample.txt) contains comparison evidence and the recommendation for grounded answers: use temperature `0` to `0.2`, a task-sized `max_tokens` cap, and `stop` only when a reliable boundary is known. Tune `top_p` instead of temperature rather than tuning both together.

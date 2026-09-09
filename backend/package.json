@@ -9,6 +9,7 @@
     "params:compare": "node model-parameters.js",
     "embed:corpus": "node embed-corpus.js",
     "embedding:sanity": "node embedding-sanity-check.js",
+    "retrieve:query": "node vector-store-retrieval.js",
     "test": "node --test"
   },
   "keywords": [],
