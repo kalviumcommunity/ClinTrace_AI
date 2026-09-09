@@ -1,0 +1,37 @@
+{
+  "loaded_count": 4,
+  "skipped_count": 1,
+  "documents": [
+    {
+      "source": "protocol.pdf",
+      "format": "pdf",
+      "char_count": 126,
+      "sample": "Consent is required before retrieval. The protocol applies to adult patients."
+    },
+    {
+      "source": "notes.txt",
+      "format": "txt",
+      "char_count": 82,
+      "sample": "Plain-text intake preserves the source filename for later citation."
+    },
+    {
+      "source": "guide.md",
+      "format": "md",
+      "char_count": 96,
+      "sample": "# Retrieval guide\n\nUse the approved protocol before indexing a document."
+    },
+    {
+      "source": "export.html",
+      "format": "html",
+      "char_count": 74,
+      "sample": "Clinical export Follow the approved protocol before retrieval."
+    }
+  ],
+  "skipped": [
+    {
+      "source": "broken.pdf",
+      "source_path": "data/broken.pdf",
+      "reason": "EOF marker not found"
+    }
+  ]
+}

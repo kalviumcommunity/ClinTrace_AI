@@ -1,13 +1,12 @@
 require("dotenv").config();
 
 const OpenAI = require("openai");
+const {
+  GROUNDING_SYSTEM_PROMPT,
+  renderAnswerPrompt,
+} = require("./prompts/answer");
 
-const systemMessage = [
-  "You are a support assistant for an internal company documentation tool.",
-  "Answer only questions about company policies described in the supplied context.",
-  "Be factual, professional, and concise: use no more than two sentences.",
-  "If the context does not contain the answer, say: I don't know based on the available documentation.",
-].join(" ");
+const systemMessage = GROUNDING_SYSTEM_PROMPT;
 
 const policyContext =
   "Documentation excerpt: Eligible customers may request a refund within 30 days of purchase. Refund requests are reviewed against the policy requirements.";
@@ -15,11 +14,18 @@ const policyContext =
 const promptVariations = [
   {
     name: "Vague prompt",
-    content: `${policyContext}\n\nExplain our refund policy.`,
+    content: renderAnswerPrompt({
+      context: policyContext,
+      question: "Explain our refund policy.",
+    }),
   },
   {
     name: "Clear constrained prompt",
-    content: `${policyContext}\n\nIn one sentence, state the refund window in days. If the documentation does not give a number, say that you don't know.`,
+    content: renderAnswerPrompt({
+      context: policyContext,
+      question:
+        "In one sentence, state the refund window in days. If the documentation does not give a number, say that you don't know.",
+    }),
   },
 ];
 
@@ -106,6 +112,7 @@ if (require.main === module) {
 module.exports = {
   comparePrompts,
   createClient,
+  policyContext,
   promptVariations,
   systemMessage,
 };

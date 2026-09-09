@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node index.js",
     "prompt:compare": "node prompt-comparison.js",
+    "params:compare": "node model-parameters.js",
     "embed:corpus": "node embed-corpus.js",
     "embedding:sanity": "node embedding-sanity-check.js",
     "retrieve:query": "node vector-store-retrieval.js",
@@ -18,6 +19,7 @@
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "js-tiktoken": "^1.0.21",
     "openai": "^6.1.0"
   }
 }

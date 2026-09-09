@@ -1,0 +1,28 @@
+SHARED TEMPLATE
+Context:
+{context}
+
+Question: {question}
+
+Answer only from the context. If the answer is not there, say:
+I do not have enough information to answer this based on current protocols.
+
+CHAT FEATURE RENDER (historyManager.js)
+Context:
+The protocol allows a 30-day refund window.
+
+Question: What is the refund window?
+
+Answer only from the context. If the answer is not there, say:
+I do not have enough information to answer this based on current protocols.
+
+BATCH FEATURE RENDER (prompt-comparison.js)
+Context:
+Documentation excerpt: Eligible customers may request a refund within 30 days of purchase. Refund requests are reviewed against the policy requirements.
+
+Question: In one sentence, state the refund window in days. If the documentation does not give a number, say that you don't know.
+
+Answer only from the context. If the answer is not there, say:
+I do not have enough information to answer this based on current protocols.
+
+Both features import and render the same template module. Only context and question values change at runtime.

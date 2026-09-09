@@ -1,0 +1,43 @@
+MODEL PARAMETER COMPARISON
+
+Same model, system message, and user message for every request.
+
+temperature=0
+parameters: {"temperature":0}
+output: The refund window is 30 days from purchase. Requests are reviewed against the policy requirements.
+finish_reason: stop
+usage: {"prompt_tokens":55,"completion_tokens":16,"total_tokens":71}
+
+temperature=1.2
+parameters: {"temperature":1.2}
+output: Eligible customers have 30 days to request a refund after purchase. The request is then checked against the policy requirements.
+finish_reason: stop
+usage: {"prompt_tokens":55,"completion_tokens":19,"total_tokens":74}
+
+max_tokens=12
+parameters: {"max_tokens":12}
+output: The refund window is 30 days from purchase. Requests are
+finish_reason: length
+usage: {"prompt_tokens":55,"completion_tokens":12,"total_tokens":67}
+
+max_tokens=80
+parameters: {"max_tokens":80}
+output: The refund window is 30 days from purchase. Requests are reviewed against the policy requirements.
+finish_reason: stop
+usage: {"prompt_tokens":55,"completion_tokens":16,"total_tokens":71}
+
+stop=blank-line
+parameters: {"stop":["\n\n"]}
+output: The refund window is 30 days from purchase. Requests are reviewed against the policy requirements.
+finish_reason: stop
+usage: {"prompt_tokens":55,"completion_tokens":16,"total_tokens":71}
+
+Interpretation:
+- Lower temperature is more repeatable and stays close to the documented facts; higher temperature permits more variation in wording.
+- max_tokens=12 stops generation early with finish_reason=length, while the larger cap allows the complete answer. Output tokens are billed, so the cap controls cost.
+- stop ends generation when the configured sequence appears. It is useful only when that boundary is reliable; a poorly chosen sequence can truncate a valid answer.
+
+Recommended grounded-task settings:
+- temperature: 0 to 0.2 for stable, factual answers.
+- max_tokens: a task-sized cap, such as 100 for a short RAG answer, to prevent rambling and limit output cost.
+- stop: optional, only for a known answer boundary. Tune top_p instead of temperature, not both together.
