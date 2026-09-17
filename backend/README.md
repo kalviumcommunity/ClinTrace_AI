@@ -36,9 +36,9 @@ The checked-in [embedding-sample-output.json](embedding-sample-output.json) reco
 
 Run `npm run embedding:sanity` to rank the known fixture chunks with cosine similarity and write [embedding-sanity-report.json](embedding-sanity-report.json). The report contains four known query-source tests, ranked sources, scores, pass/failure counts, and a deliberately mixed-topic borderline case. That failure is useful: it shows that a small corpus can produce an ambiguous vector, so retrieval should be improved with richer chunks or query decomposition before trusting it broadly.
 
-## Top-k retrieval
+## Retrieval and re-ranking
 
-Run `npm run retrieve:query` to embed a user query with the configured `EMBEDDING_MODEL`, search the vector store, and return ranked chunks with scores, source text, and metadata. The demo runs the same query with `k=1` and `k=2`; [retrieval-sample-output.json](retrieval-sample-output.json) shows how the second result appears as `k` increases. The runtime rejects a query model that differs from the model recorded for the document store.
+Run `npm run retrieve:query` to embed a user query with the configured `EMBEDDING_MODEL`, retrieve a larger candidate set, and re-rank it with deterministic lexical relevance. The demo retrieves 3 candidates and keeps the final top 2. Vector retrieval provides broad semantic recall; re-ranking then combines the original vector score (20%) with query-term coverage (80%), which helps a directly matching chunk outrank a noisy vector neighbor.
 
 ## Model parameters & output control
 
@@ -47,3 +47,4 @@ Run `npm run params:compare` to compare the same grounded prompt at `temperature
 ## Prompt templates & reusable prompt design
 
 The reusable prompt is defined in [prompts/answer.js](prompts/answer.js), outside business logic. `renderAnswerPrompt` injects runtime `context` and `question` values into one shared template. `historyManager.js` uses it for the chat path, while `prompt-comparison.js` uses the same renderer for batch comparisons. See [prompt-template-sample.txt](prompt-template-sample.txt) for example renders.
+The checked-in [retrieval-sample-output.json](retrieval-sample-output.json) records the candidate set, original vector ordering, re-ranked ordering, final selected chunks, source text, metadata, and both scores. The runtime rejects a query model that differs from the model recorded for the document store.

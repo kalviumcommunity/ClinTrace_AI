@@ -1,48 +1,104 @@
 {
-  "query": "What is required before indexing a patient record?",
+  "query": "How does consent relate to account processing?",
   "embedding_model": "configured through EMBEDDING_MODEL",
   "query_vector_length": 3,
-  "runs": [
+  "candidate_k": 3,
+  "k": 2,
+  "candidate_results": [
     {
-      "k": 1,
-      "results": [
-        {
-          "rank": 1,
-          "score": 0.998688,
-          "text": "Consent is required before a patient record can be indexed.",
-          "metadata": {
-            "source_document": "intake-policy.md",
-            "chunk_index": 0,
-            "section": "Consent"
-          }
-        }
-      ]
+      "rank": 1,
+      "score": 0.998688,
+      "text": "Invoices are generated monthly for active subscriptions.",
+      "metadata": {
+        "source_document": "billing-policy.md",
+        "chunk_index": 0,
+        "section": "Invoices"
+      }
     },
     {
-      "k": 2,
-      "results": [
-        {
-          "rank": 1,
-          "score": 0.998688,
-          "text": "Consent is required before a patient record can be indexed.",
-          "metadata": {
-            "source_document": "intake-policy.md",
-            "chunk_index": 0,
-            "section": "Consent"
-          }
-        },
-        {
-          "rank": 2,
-          "score": 0.151565,
-          "text": "Invoices are generated monthly for active subscriptions.",
-          "metadata": {
-            "source_document": "billing-policy.md",
-            "chunk_index": 0,
-            "section": "Invoices"
-          }
-        }
-      ]
+      "rank": 2,
+      "score": 0.151565,
+      "text": "Consent is required before a patient record can be indexed.",
+      "metadata": {
+        "source_document": "intake-policy.md",
+        "chunk_index": 0,
+        "section": "Consent"
+      }
+    },
+    {
+      "rank": 3,
+      "score": 0.05018,
+      "text": "Discharge summaries are reviewed after the patient leaves care.",
+      "metadata": {
+        "source_document": "discharge-guide.md",
+        "chunk_index": 0,
+        "section": "Discharge"
+      }
     }
   ],
-  "note": "The sample uses the same stored-vector shape as the embedding pipeline; a live run embeds the query through the configured OpenAI-compatible API before searching the vector store."
+  "reranked_results": [
+    {
+      "rank": 1,
+      "score": 0.151565,
+      "rerank_score": 0.25,
+      "combined_score": 0.230313,
+      "text": "Consent is required before a patient record can be indexed.",
+      "metadata": {
+        "source_document": "intake-policy.md",
+        "chunk_index": 0,
+        "section": "Consent"
+      }
+    },
+    {
+      "rank": 2,
+      "score": 0.998688,
+      "rerank_score": 0,
+      "combined_score": 0.199738,
+      "text": "Invoices are generated monthly for active subscriptions.",
+      "metadata": {
+        "source_document": "billing-policy.md",
+        "chunk_index": 0,
+        "section": "Invoices"
+      }
+    },
+    {
+      "rank": 3,
+      "score": 0.05018,
+      "rerank_score": 0,
+      "combined_score": 0.010036,
+      "text": "Discharge summaries are reviewed after the patient leaves care.",
+      "metadata": {
+        "source_document": "discharge-guide.md",
+        "chunk_index": 0,
+        "section": "Discharge"
+      }
+    }
+  ],
+  "results": [
+    {
+      "rank": 1,
+      "score": 0.151565,
+      "rerank_score": 0.25,
+      "combined_score": 0.230313,
+      "text": "Consent is required before a patient record can be indexed.",
+      "metadata": {
+        "source_document": "intake-policy.md",
+        "chunk_index": 0,
+        "section": "Consent"
+      }
+    },
+    {
+      "rank": 2,
+      "score": 0.998688,
+      "rerank_score": 0,
+      "combined_score": 0.199738,
+      "text": "Invoices are generated monthly for active subscriptions.",
+      "metadata": {
+        "source_document": "billing-policy.md",
+        "chunk_index": 0,
+        "section": "Invoices"
+      }
+    }
+  ],
+  "note": "The initial vector order puts billing first, but the lexical re-ranker promotes the consent chunk because it directly matches the query topic. The demo uses a 3-chunk candidate set and returns the final top 2."
 }
