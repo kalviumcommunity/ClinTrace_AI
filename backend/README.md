@@ -60,3 +60,7 @@ The checked-in [retrieval-sample-output.json](retrieval-sample-output.json) reco
 ## End-to-end RAG pipeline
 
 `rag-pipeline.js` composes the query-to-answer flow into separate `embedStage`, `retrieveStage`, `assembleStage`, and `generateStage` functions. `runRagPipeline` returns the generated answer, selected sources, token budget, and per-stage evidence. The flow is documented in [rag-pipeline-flow.md](rag-pipeline-flow.md), and [rag-pipeline-sample-output.json](rag-pipeline-sample-output.json) records an offline sample query with its answer and sources. Run `npm run pipeline:sample` to execute the sample without an API key.
+
+## Grounded answer generation
+
+`grounded-answer.js` generates only after retrieved chunks are assembled, verifies that citations map to those chunks and that significant answer terms occur in the evidence, and returns the insufficient-context fallback when retrieval is empty. The checked-in [grounded-answer-sample-output.json](grounded-answer-sample-output.json) compares the same question with and without retrieval. Run `npm run grounding:sample` for the grounded sample; the comparison and validation are covered by `grounded-answer.test.js`.
