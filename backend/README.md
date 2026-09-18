@@ -52,3 +52,7 @@ The reusable prompt is defined in [prompts/answer.js](prompts/answer.js), outsid
 
 `prompts/context-assembly.js` formats ranked retrieval results as `[1]`, `[2]`, and source filenames, then measures the complete system and user prompt with `cl100k_base`. It reserves `maxAnswerTokens` before adding chunks, truncates the last fitting chunk when necessary, and records omitted sources. The checked-in [augmented-prompt-sample.txt](augmented-prompt-sample.txt) shows the assembled prompt and token-budget output. Run `npm test` to verify the budget never exceeds the configured model context window.
 The checked-in [retrieval-sample-output.json](retrieval-sample-output.json) records the candidate set, original vector ordering, re-ranked ordering, final selected chunks, source text, metadata, and both scores. The runtime rejects a query model that differs from the model recorded for the document store.
+
+## End-to-end RAG pipeline
+
+`rag-pipeline.js` composes the query-to-answer flow into separate `embedStage`, `retrieveStage`, `assembleStage`, and `generateStage` functions. `runRagPipeline` returns the generated answer, selected sources, token budget, and per-stage evidence. The flow is documented in [rag-pipeline-flow.md](rag-pipeline-flow.md), and [rag-pipeline-sample-output.json](rag-pipeline-sample-output.json) records an offline sample query with its answer and sources. Run `npm run pipeline:sample` to execute the sample without an API key.
