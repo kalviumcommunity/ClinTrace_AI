@@ -1,0 +1,30 @@
+{
+  "query": "What is required before indexing a patient record?",
+  "stages": {
+    "embed": { "vectorLength": 3 },
+    "retrieve": {
+      "candidateCount": 3,
+      "results": [
+        { "source": "intake-policy.md", "text": "Consent is required before a patient record can be indexed.", "score": 0.998688, "rank": 1, "rerank_score": 0.75, "combined_score": 0.799738 },
+        { "source": "discharge-guide.md", "text": "Discharge summaries are reviewed after the patient leaves care.", "score": 0.00512, "rank": 2, "rerank_score": 0.25, "combined_score": 0.201024 }
+      ]
+    },
+    "assemble": {
+      "context": "[1] Source: intake-policy.md\nConsent is required before a patient record can be indexed.\n\n[2] Source: billing-policy.md\nInvoices are generated monthly for active subscriptions.",
+      "selectedChunks": [
+        { "rank": 1, "source": "intake-policy.md", "text": "Consent is required before a patient record can be indexed." },
+        { "rank": 2, "source": "discharge-guide.md", "text": "Discharge summaries are reviewed after the patient leaves care." }
+      ],
+      "tokenBudget": { "modelContextTokens": 256, "promptTokens": 124, "reservedAnswerTokens": 48, "totalReservedTokens": 172, "remainingTokens": 84 }
+    },
+    "generate": {
+      "answer": "Consent is required before a patient record can be indexed. [1]",
+      "usage": { "prompt_tokens": 124, "completion_tokens": 13, "total_tokens": 137 }
+    }
+  },
+  "answer": "Consent is required before a patient record can be indexed. [1]",
+  "sources": [
+    { "marker": "[1]", "source": "intake-policy.md" },
+    { "marker": "[2]", "source": "discharge-guide.md" }
+  ]
+}
