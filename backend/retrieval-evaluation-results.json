@@ -1,0 +1,133 @@
+{
+  "query_count": 4,
+  "k_values": [1, 2],
+  "metrics": {
+    "vector_only": {
+      "recall_at_1": 0.75,
+      "precision_at_1": 0.75,
+      "recall_at_2": 1,
+      "precision_at_2": 0.5
+    },
+    "reranked": {
+      "recall_at_1": 1,
+      "precision_at_1": 1,
+      "recall_at_2": 1,
+      "precision_at_2": 0.5
+    }
+  },
+  "results": [
+    {
+      "id": "consent-query",
+      "query": "What is required before indexing a patient record?",
+      "expected_chunk_ids": ["intake-policy.md#0"],
+      "vector_only": {
+        "top_results": [
+          {"rank": 1, "chunk_id": "intake-policy.md#0", "source": "intake-policy.md", "score": 0.998688},
+          {"rank": 2, "chunk_id": "billing-policy.md#0", "source": "billing-policy.md", "score": 0.151565}
+        ],
+        "metrics": [
+          {"k": 1, "relevant_retrieved": 1, "recall": 1, "precision": 1},
+          {"k": 2, "relevant_retrieved": 1, "recall": 1, "precision": 0.5}
+        ]
+      },
+      "reranked": {
+        "top_results": [
+          {"rank": 1, "chunk_id": "intake-policy.md#0", "source": "intake-policy.md", "combined_score": 0.799738},
+          {"rank": 2, "chunk_id": "discharge-guide.md#0", "source": "discharge-guide.md", "combined_score": 0.201024}
+        ],
+        "metrics": [
+          {"k": 1, "relevant_retrieved": 1, "recall": 1, "precision": 1},
+          {"k": 2, "relevant_retrieved": 1, "recall": 1, "precision": 0.5}
+        ]
+      },
+      "note": "Clear single-topic query should match the intake chunk."
+    },
+    {
+      "id": "billing-query",
+      "query": "When are subscription invoices generated?",
+      "expected_chunk_ids": ["billing-policy.md#0"],
+      "vector_only": {
+        "top_results": [
+          {"rank": 1, "chunk_id": "billing-policy.md#0", "source": "billing-policy.md", "score": 0.998688},
+          {"rank": 2, "chunk_id": "intake-policy.md#0", "source": "intake-policy.md", "score": 0.151565}
+        ],
+        "metrics": [
+          {"k": 1, "relevant_retrieved": 1, "recall": 1, "precision": 1},
+          {"k": 2, "relevant_retrieved": 1, "recall": 1, "precision": 0.5}
+        ]
+      },
+      "reranked": {
+        "top_results": [
+          {"rank": 1, "chunk_id": "billing-policy.md#0", "source": "billing-policy.md", "combined_score": 0.733071},
+          {"rank": 2, "chunk_id": "intake-policy.md#0", "source": "intake-policy.md", "combined_score": 0.030313}
+        ],
+        "metrics": [
+          {"k": 1, "relevant_retrieved": 1, "recall": 1, "precision": 1},
+          {"k": 2, "relevant_retrieved": 1, "recall": 1, "precision": 0.5}
+        ]
+      },
+      "note": "Clear single-topic query should match the billing chunk."
+    },
+    {
+      "id": "discharge-query",
+      "query": "What happens after a patient leaves care?",
+      "expected_chunk_ids": ["discharge-guide.md#0"],
+      "vector_only": {
+        "top_results": [
+          {"rank": 1, "chunk_id": "discharge-guide.md#0", "source": "discharge-guide.md", "score": 0.993582},
+          {"rank": 2, "chunk_id": "intake-policy.md#0", "source": "intake-policy.md", "score": 0.10596}
+        ],
+        "metrics": [
+          {"k": 1, "relevant_retrieved": 1, "recall": 1, "precision": 1},
+          {"k": 2, "relevant_retrieved": 1, "recall": 1, "precision": 0.5}
+        ]
+      },
+      "reranked": {
+        "top_results": [
+          {"rank": 1, "chunk_id": "discharge-guide.md#0", "source": "discharge-guide.md", "combined_score": 0.838716},
+          {"rank": 2, "chunk_id": "intake-policy.md#0", "source": "intake-policy.md", "combined_score": 0.181192}
+        ],
+        "metrics": [
+          {"k": 1, "relevant_retrieved": 1, "recall": 1, "precision": 1},
+          {"k": 2, "relevant_retrieved": 1, "recall": 1, "precision": 0.5}
+        ]
+      },
+      "note": "Clear single-topic query should match the discharge chunk."
+    },
+    {
+      "id": "mixed-consent-billing-query",
+      "query": "How does consent relate to account processing?",
+      "expected_chunk_ids": ["intake-policy.md#0"],
+      "vector_only": {
+        "top_results": [
+          {"rank": 1, "chunk_id": "billing-policy.md#0", "source": "billing-policy.md", "score": 0.757502},
+          {"rank": 2, "chunk_id": "intake-policy.md#0", "source": "intake-policy.md", "score": 0.725832}
+        ],
+        "metrics": [
+          {"k": 1, "relevant_retrieved": 0, "recall": 0, "precision": 0},
+          {"k": 2, "relevant_retrieved": 1, "recall": 1, "precision": 0.5}
+        ]
+      },
+      "reranked": {
+        "top_results": [
+          {"rank": 1, "chunk_id": "intake-policy.md#0", "source": "intake-policy.md", "combined_score": 0.305166},
+          {"rank": 2, "chunk_id": "billing-policy.md#0", "source": "billing-policy.md", "combined_score": 0.1515}
+        ],
+        "metrics": [
+          {"k": 1, "relevant_retrieved": 1, "recall": 1, "precision": 1},
+          {"k": 2, "relevant_retrieved": 1, "recall": 1, "precision": 0.5}
+        ]
+      },
+      "note": "Mixed-topic wording creates an ambiguous embedding between intake and billing."
+    }
+  ],
+  "failure_analysis": [
+    {
+      "id": "mixed-consent-billing-query",
+      "failed_stage": "vector_only",
+      "likely_cause": "Mixed-topic wording creates an ambiguous embedding between intake and billing.",
+      "observed": "Vector ranking missed the expected chunk, but lexical reranking recovered it.",
+      "improvement": "Use richer labelled data, query decomposition, and embedding-model checks before production rollout."
+    }
+  ]
+}

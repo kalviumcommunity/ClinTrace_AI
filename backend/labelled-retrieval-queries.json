@@ -1,0 +1,33 @@
+{
+  "description": "Labelled retrieval queries for the prepared embedding fixture.",
+  "queries": [
+    {
+      "id": "consent-query",
+      "text": "What is required before indexing a patient record?",
+      "embedding": [0.98, 0.1, 0],
+      "expected_chunk_ids": ["intake-policy.md#0"],
+      "likely_cause": "Clear single-topic query should match the intake chunk."
+    },
+    {
+      "id": "billing-query",
+      "text": "When are subscription invoices generated?",
+      "embedding": [0.1, 0.98, 0],
+      "expected_chunk_ids": ["billing-policy.md#0"],
+      "likely_cause": "Clear single-topic query should match the billing chunk."
+    },
+    {
+      "id": "discharge-query",
+      "text": "What happens after a patient leaves care?",
+      "embedding": [0.1, 0.1, 0.98],
+      "expected_chunk_ids": ["discharge-guide.md#0"],
+      "likely_cause": "Clear single-topic query should match the discharge chunk."
+    },
+    {
+      "id": "mixed-consent-billing-query",
+      "text": "How does consent relate to account processing?",
+      "embedding": [0.62, 0.65, 0],
+      "expected_chunk_ids": ["intake-policy.md#0"],
+      "likely_cause": "Mixed-topic wording creates an ambiguous embedding between intake and billing."
+    }
+  ]
+}
