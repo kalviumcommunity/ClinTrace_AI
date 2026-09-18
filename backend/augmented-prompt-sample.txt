@@ -16,6 +16,7 @@ The billing policy describes a separate review process.
 
 Question: What must happen before account processing?
 
+When the context includes source markers, cite the supporting marker(s), such as [1].
 Answer only from the context. If the answer is not there, say:
 I do not have enough information to answer this based on current protocols.
 
