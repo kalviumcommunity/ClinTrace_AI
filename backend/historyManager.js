@@ -4,6 +4,7 @@ const {
     GROUNDING_SYSTEM_PROMPT,
     renderAnswerPrompt,
 } = require('./prompts/answer');
+const { assembleGroundedPrompt } = require('./prompts/context-assembly');
 
 const tokenizer = getEncoding("cl100k_base");
 
@@ -38,10 +39,17 @@ function trimMessageHistory(messages, maxTokens = 3000) {
 }
 
 function prepareMessagesForLLM(userQuery, previousHistory = [], maxContextTokens = 3000, retrievedContext = "No retrieved context was provided.") {
+    const context = Array.isArray(retrievedContext)
+        ? assembleGroundedPrompt({
+            question: userQuery,
+            retrievedChunks: retrievedContext,
+            modelContextTokens: maxContextTokens,
+        }).prompt
+        : renderAnswerPrompt({ context: retrievedContext, question: userQuery });
     const messages = [
         SYSTEM_PROMPT,
         ...previousHistory,
-        { role: "user", content: renderAnswerPrompt({ context: retrievedContext, question: userQuery }) }
+        { role: "user", content: context }
     ];
     return trimMessageHistory(messages, maxContextTokens);
 }

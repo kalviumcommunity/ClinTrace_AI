@@ -47,4 +47,8 @@ Run `npm run params:compare` to compare the same grounded prompt at `temperature
 ## Prompt templates & reusable prompt design
 
 The reusable prompt is defined in [prompts/answer.js](prompts/answer.js), outside business logic. `renderAnswerPrompt` injects runtime `context` and `question` values into one shared template. `historyManager.js` uses it for the chat path, while `prompt-comparison.js` uses the same renderer for batch comparisons. See [prompt-template-sample.txt](prompt-template-sample.txt) for example renders.
+
+## Retrieved context assembly
+
+`prompts/context-assembly.js` formats ranked retrieval results as `[1]`, `[2]`, and source filenames, then measures the complete system and user prompt with `cl100k_base`. It reserves `maxAnswerTokens` before adding chunks, truncates the last fitting chunk when necessary, and records omitted sources. The checked-in [augmented-prompt-sample.txt](augmented-prompt-sample.txt) shows the assembled prompt and token-budget output. Run `npm test` to verify the budget never exceeds the configured model context window.
 The checked-in [retrieval-sample-output.json](retrieval-sample-output.json) records the candidate set, original vector ordering, re-ranked ordering, final selected chunks, source text, metadata, and both scores. The runtime rejects a query model that differs from the model recorded for the document store.

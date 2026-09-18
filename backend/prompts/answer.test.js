@@ -12,7 +12,7 @@ test("renders named context and question placeholders", () => {
       context: "Refunds are available within 30 days.",
       question: "How long is the refund window?",
     }),
-    "Context:\nRefunds are available within 30 days.\n\nQuestion: How long is the refund window?\n\nAnswer only from the context. If the answer is not there, say:\nI do not have enough information to answer this based on current protocols.",
+    "Context:\nRefunds are available within 30 days.\n\nQuestion: How long is the refund window?\n\nWhen the context includes source markers, cite the supporting marker(s), such as [1].\nAnswer only from the context. If the answer is not there, say:\nI do not have enough information to answer this based on current protocols.",
   );
 });
 

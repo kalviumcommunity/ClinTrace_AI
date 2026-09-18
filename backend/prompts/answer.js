@@ -4,6 +4,7 @@ const ANSWER_PROMPT_TEMPLATE = [
   "",
   "Question: {question}",
   "",
+  "When the context includes source markers, cite the supporting marker(s), such as [1].",
   "Answer only from the context. If the answer is not there, say:",
   'I do not have enough information to answer this based on current protocols.',
 ].join("\n");

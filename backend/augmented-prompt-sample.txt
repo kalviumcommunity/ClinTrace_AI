@@ -1,0 +1,25 @@
+AUGMENTED PROMPT SAMPLE
+=======================
+
+Model context budget: 256 tokens
+Reserved answer budget: 48 tokens
+Assembled prompt tokens: 114
+Total reserved tokens: 162
+Remaining tokens: 94
+
+Context:
+[1] Source: intake-policy.md
+Consent must be recorded before account processing begins.
+
+[2] Source: billing-policy.md
+The billing policy describes a separate review process.
+
+Question: What must happen before account processing?
+
+When the context includes source markers, cite the supporting marker(s), such as [1].
+Answer only from the context. If the answer is not there, say:
+I do not have enough information to answer this based on current protocols.
+
+The [1] marker lets the answer cite intake-policy.md. The assembler measures the
+complete system and user messages, keeps 48 tokens available for the answer, and
+omits or truncates lower-ranked chunks when the configured model budget is full.
