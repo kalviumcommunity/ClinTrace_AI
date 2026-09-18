@@ -35,6 +35,42 @@ class InMemoryVectorStore {
   }
 }
 
+const STOP_WORDS = new Set([
+  "a", "an", "and", "are", "before", "does", "for", "how", "is", "of", "the", "what", "when",
+]);
+
+function tokenize(text) {
+  return new Set(
+    text.toLowerCase().match(/[a-z0-9]+/g)?.filter((token) => !STOP_WORDS.has(token)) ?? [],
+  );
+}
+
+function lexicalRelevance(query, text) {
+  const queryTokens = tokenize(query);
+  const textTokens = tokenize(text);
+  if (queryTokens.size === 0) return 0;
+
+  let matches = 0;
+  for (const token of queryTokens) {
+    if (textTokens.has(token)) matches += 1;
+  }
+  return Number((matches / queryTokens.size).toFixed(6));
+}
+
+function rerankCandidates(query, candidates) {
+  return candidates
+    .map((candidate) => {
+      const rerankScore = lexicalRelevance(query, candidate.text);
+      return {
+        ...candidate,
+        rerank_score: rerankScore,
+        combined_score: Number((candidate.score * 0.2 + rerankScore * 0.8).toFixed(6)),
+      };
+    })
+    .sort((left, right) => right.combined_score - left.combined_score)
+    .map((candidate, index) => ({ ...candidate, rank: index + 1 }));
+}
+
 function createClient({ apiKey, baseURL }) {
   return new OpenAI({ apiKey, ...(baseURL ? { baseURL } : {}) });
 }
@@ -67,6 +103,29 @@ async function retrieveTopK(query, { client, model, vectorStore, k }) {
   };
 }
 
+async function retrieveAndRerank(query, {
+  client, model, vectorStore, k, candidateK = Math.max(k * 3, 10),
+}) {
+  if (!Number.isInteger(k) || k <= 0) throw new Error("k must be a positive integer");
+  if (!Number.isInteger(candidateK) || candidateK < k) {
+    throw new Error("candidateK must be an integer greater than or equal to k");
+  }
+
+  const initial = await retrieveTopK(query, {
+    client, model, vectorStore, k: candidateK,
+  });
+  const reranked = rerankCandidates(query, initial.results);
+
+  return {
+    ...initial,
+    k,
+    candidate_k: candidateK,
+    candidate_results: initial.results,
+    reranked_results: reranked,
+    results: reranked.slice(0, k),
+  };
+}
+
 function loadPreparedVectorStore(model) {
   const fixturePath = path.join(__dirname, "embedding-sanity-fixture.json");
   const { chunks } = JSON.parse(fs.readFileSync(fixturePath, "utf8"));
@@ -78,12 +137,10 @@ async function runRetrievalDemo() {
   const config = getEmbeddingConfig();
   const client = createClient(config);
   const vectorStore = loadPreparedVectorStore(config.model);
-  const query = "What is required before indexing a patient record?";
-  const results = [];
-
-  for (const k of [1, 2]) {
-    results.push(await retrieveTopK(query, { client, model: config.model, vectorStore, k }));
-  }
+  const query = "How does consent relate to account processing?";
+  const results = await retrieveAndRerank(query, {
+    client, model: config.model, vectorStore, candidateK: 3, k: 2,
+  });
 
   console.log(JSON.stringify(results, null, 2));
   return results;
@@ -100,6 +157,9 @@ module.exports = {
   InMemoryVectorStore,
   embedQuery,
   loadPreparedVectorStore,
+  lexicalRelevance,
+  rerankCandidates,
+  retrieveAndRerank,
   retrieveTopK,
   runRetrievalDemo,
 };
