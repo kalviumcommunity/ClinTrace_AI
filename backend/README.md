@@ -51,4 +51,8 @@ The reusable prompt is defined in [prompts/answer.js](prompts/answer.js), outsid
 ## Retrieved context assembly
 
 `prompts/context-assembly.js` formats ranked retrieval results as `[1]`, `[2]`, and source filenames, then measures the complete system and user prompt with `cl100k_base`. It reserves `maxAnswerTokens` before adding chunks, truncates the last fitting chunk when necessary, and records omitted sources. The checked-in [augmented-prompt-sample.txt](augmented-prompt-sample.txt) shows the assembled prompt and token-budget output. Run `npm test` to verify the budget never exceeds the configured model context window.
+
+## Retrieval evaluation
+
+Run `npm run evaluate:retrieval` to evaluate the labelled queries in [labelled-retrieval-queries.json](labelled-retrieval-queries.json). The script reports recall@k and precision@k for vector-only and reranked results, writes [retrieval-evaluation-results.json](retrieval-evaluation-results.json), and records the mixed-topic baseline failure. See [retrieval-evaluation-failure-analysis.md](retrieval-evaluation-failure-analysis.md) for the likely cause and improvement options.
 The checked-in [retrieval-sample-output.json](retrieval-sample-output.json) records the candidate set, original vector ordering, re-ranked ordering, final selected chunks, source text, metadata, and both scores. The runtime rejects a query model that differs from the model recorded for the document store.
