@@ -1,0 +1,31 @@
+{
+  "question": "What is required before indexing a patient record?",
+  "supporting_chunks": [
+    {
+      "marker": "[1]",
+      "source": "intake-policy.md",
+      "text": "Consent is required before a patient record can be indexed."
+    },
+    {
+      "marker": "[2]",
+      "source": "discharge-guide.md",
+      "text": "Discharge summaries are reviewed after the patient leaves care."
+    }
+  ],
+  "with_retrieval": {
+    "answer": "Consent is required before a patient record can be indexed. [1]",
+    "grounded": true,
+    "cited_sources": ["intake-policy.md"],
+    "unsupported_terms": []
+  },
+  "without_retrieval": {
+    "answer": "I do not have enough information to answer this based on current protocols.",
+    "fallback": true,
+    "sources": []
+  },
+  "comparison": "Retrieval supplies evidence and citations; without it, generation falls back instead of guessing.",
+  "verification": {
+    "source_accuracy": "The answer repeats the consent/indexing rule from [1] and adds no unsupported significant terms.",
+    "grounding_check": "Citation markers must map to retrieved chunks and every significant answer term must occur in those chunks."
+  }
+}
