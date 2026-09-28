@@ -64,3 +64,9 @@ The checked-in [retrieval-sample-output.json](retrieval-sample-output.json) reco
 ## Grounded answer generation
 
 `grounded-answer.js` generates only after retrieved chunks are assembled, verifies that citations map to those chunks and that significant answer terms occur in the evidence, and returns the insufficient-context fallback when retrieval is empty. The checked-in [grounded-answer-sample-output.json](grounded-answer-sample-output.json) compares the same question with and without retrieval. Run `npm run grounding:sample` for the grounded sample; the comparison and validation are covered by `grounded-answer.test.js`.
+
+## Runtime document upload
+
+`POST /api/upload` accepts a `.txt` or `.md` file in the `document` multipart field, stores it with a generated filename, cleans and chunks it, embeds the chunks, and upserts them into the `clintrace_runtime_chunks` Chroma collection. The default upload limit is 5 MiB. `POST /api/query` embeds a query and reads the current collection, so a successful upload is searchable without restarting the process. See [upload-sample-request.txt](upload-sample-request.txt) and [upload-index-query-sample.json](upload-index-query-sample.json) for the committed sample run.
+
+For very large documents, the API should hand the upload to a background job after durable object-storage upload. The worker can stream extraction, chunk and embed in bounded batches, checkpoint progress, retry failed batches, and upsert each batch idempotently; the API can return `202 Accepted` with a job ID instead of holding a request open.

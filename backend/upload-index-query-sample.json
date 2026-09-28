@@ -1,0 +1,23 @@
+{
+  "upload": {
+    "status": 201,
+    "message": "Document uploaded, embedded, and indexed",
+    "filename": "sample-upload.txt",
+    "chunks_created": 2,
+    "embedding_dimension": 1536,
+    "indexed": true
+  },
+  "query_after_upload_without_restart": {
+    "status": 200,
+    "query": "How long are signed consent records retained?",
+    "results": [
+      {
+        "text": "The clinic retains signed consent records for seven years.",
+        "metadata": {
+          "source_document": "sample-upload.txt",
+          "chunk_index": 0
+        }
+      }
+    ]
+  }
+}
