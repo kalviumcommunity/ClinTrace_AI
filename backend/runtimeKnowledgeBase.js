@@ -133,6 +133,7 @@ class RuntimeKnowledgeBase {
       include: ["documents", "metadatas", "distances"],
     });
     return (result.documents?.[0] || []).map((text, index) => ({
+      chunk_id: result.ids?.[0]?.[index] || null,
       text,
       metadata: result.metadatas?.[0]?.[index] || {},
       score: result.distances?.[0]?.[index] === undefined ? null : Number((1 - result.distances[0][index]).toFixed(6)),

@@ -2,10 +2,12 @@
 require('dotenv').config();
 const express = require('express');
 const multer = require('multer');
+const cors = require('cors');
 const { prepareMessagesForLLM } = require('./historyManager');
 const { RuntimeKnowledgeBase, UploadError, DEFAULT_MAX_BYTES } = require('./runtimeKnowledgeBase');
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 const knowledgeBase = new RuntimeKnowledgeBase();
 const upload = multer({
@@ -36,7 +38,10 @@ app.post('/api/upload', receiveUpload, async (req, res) => {
 app.post('/api/query', async (req, res) => {
     try {
         const results = await knowledgeBase.search(req.body?.query, req.body?.k || 5);
-        res.json({ query: req.body.query, results });
+        const answer = results.length
+            ? results.map((result) => result.text).join(' ')
+            : 'I could not find a grounded answer in the indexed documents.';
+        res.json({ query: req.body.query, answer, results });
     } catch (error) {
         const statusCode = error instanceof UploadError ? error.statusCode : 500;
         res.status(statusCode).json({ error: error.message || 'Query failed' });
