@@ -1,0 +1,6 @@
+curl -X POST http://localhost:5000/api/upload ^
+  -F "document=@backend/sample-upload.txt"
+
+curl -X POST http://localhost:5000/api/query ^
+  -H "Content-Type: application/json" ^
+  -d "{\"query\":\"How long are signed consent records retained?\",\"k\":2}"

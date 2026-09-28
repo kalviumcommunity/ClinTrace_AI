@@ -1,0 +1,4 @@
+Runtime indexing demo
+
+The clinic retains signed consent records for seven years.
+Patients may request a copy of their retained record through the records desk.

@@ -1,10 +1,47 @@
 // backend/index.js
 require('dotenv').config();
 const express = require('express');
+const multer = require('multer');
 const { prepareMessagesForLLM } = require('./historyManager');
+const { RuntimeKnowledgeBase, UploadError, DEFAULT_MAX_BYTES } = require('./runtimeKnowledgeBase');
 
 const app = express();
 app.use(express.json());
+const knowledgeBase = new RuntimeKnowledgeBase();
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: DEFAULT_MAX_BYTES },
+});
+
+function receiveUpload(req, res, next) {
+    upload.single('document')(req, res, (error) => {
+        if (!error) return next();
+        if (error.code === 'LIMIT_FILE_SIZE') {
+            return res.status(413).json({ error: `The uploaded document exceeds the ${DEFAULT_MAX_BYTES} byte limit` });
+        }
+        return res.status(400).json({ error: error.message || 'Invalid multipart upload' });
+    });
+}
+
+app.post('/api/upload', receiveUpload, async (req, res) => {
+    try {
+        const summary = await knowledgeBase.ingest(req.file);
+        res.status(201).json({ message: 'Document uploaded, embedded, and indexed', ...summary });
+    } catch (error) {
+        const statusCode = error instanceof UploadError ? error.statusCode : 500;
+        res.status(statusCode).json({ error: error.message || 'Document processing failed' });
+    }
+});
+
+app.post('/api/query', async (req, res) => {
+    try {
+        const results = await knowledgeBase.search(req.body?.query, req.body?.k || 5);
+        res.json({ query: req.body.query, results });
+    } catch (error) {
+        const statusCode = error instanceof UploadError ? error.statusCode : 500;
+        res.status(statusCode).json({ error: error.message || 'Query failed' });
+    }
+});
 
 // Mock LLM API call for testing the payload
 app.post('/api/chat', async (req, res) => {
@@ -36,6 +73,10 @@ app.post('/api/chat', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
+}
+
+module.exports = { app, knowledgeBase };
