@@ -48,6 +48,54 @@ app.post('/api/query', async (req, res) => {
     }
 });
 
+function groundedAnswer(results) {
+    return results.length
+        ? results.map((result, index) => `[${index + 1}] ${result.text}`).join(' ')
+        : 'I could not find a grounded answer in the indexed documents.';
+}
+
+app.post('/api/query/stream', async (req, res) => {
+    let clientDisconnected = false;
+    req.on('close', () => { clientDisconnected = true; });
+
+    try {
+        const results = await knowledgeBase.search(req.body?.query, req.body?.k || 5);
+        if (clientDisconnected) return;
+
+        res.status(200);
+        res.set({
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache, no-transform',
+            Connection: 'keep-alive',
+            'X-Accel-Buffering': 'no',
+        });
+        res.flushHeaders();
+
+        const send = (event, data) => {
+            if (!clientDisconnected && !res.writableEnded) {
+                res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+            }
+        };
+
+        send('sources', { results });
+        const answer = groundedAnswer(results);
+        for (const token of answer.match(/\S+\s*/g) || []) {
+            if (clientDisconnected) return;
+            send('token', { text: token });
+            await new Promise((resolve) => setTimeout(resolve, 35));
+        }
+        send('done', { answer });
+        res.end();
+    } catch (error) {
+        const statusCode = error instanceof UploadError ? error.statusCode : 500;
+        if (!res.headersSent) return res.status(statusCode).json({ error: error.message || 'Streaming query failed' });
+        if (!clientDisconnected) {
+            res.write(`event: error\ndata: ${JSON.stringify({ error: error.message || 'Streaming query failed' })}\n\n`);
+            res.end();
+        }
+    }
+});
+
 // Mock LLM API call for testing the payload
 app.post('/api/chat', async (req, res) => {
     try {
