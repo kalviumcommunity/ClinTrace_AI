@@ -29,18 +29,43 @@ export default function Home() {
     if (!trimmedQuestion || loading) return;
     setLoading(true);
     setError("");
-    setResponse(null);
+    setResponse({ answer: "", results: [] });
     try {
-      const result = await fetch(`${API_URL}/api/query`, {
+      const result = await fetch(`${API_URL}/api/query/stream`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query: trimmedQuestion, k: 4 }),
       });
-      const payload = await result.json();
-      if (!result.ok) throw new Error(payload.error || "The RAG API could not answer the question.");
-      setResponse(payload);
+      if (!result.ok || !result.body) {
+        const payload = await result.json().catch(() => ({}));
+        throw new Error(payload.error || "The streaming RAG API could not answer the question.");
+      }
+
+      const reader = result.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let sawDone = false;
+      while (true) {
+        const { value, done } = await reader.read();
+        buffer += decoder.decode(value || new Uint8Array(), { stream: !done });
+        const events = buffer.split("\n\n");
+        buffer = events.pop() || "";
+        for (const eventText of events) {
+          const eventName = eventText.match(/^event: (.+)$/m)?.[1];
+          const dataLine = eventText.match(/^data: (.+)$/m)?.[1];
+          if (!eventName || !dataLine) continue;
+          const data = JSON.parse(dataLine);
+          if (eventName === "sources") setResponse((current) => ({ answer: current?.answer || "", results: data.results }));
+          if (eventName === "token") setResponse((current) => ({ answer: `${current?.answer || ""}${data.text}`, results: current?.results || [] }));
+          if (eventName === "done") sawDone = true;
+          if (eventName === "error") throw new Error(data.error || "The answer stream was interrupted.");
+        }
+        if (done) break;
+      }
+      if (!sawDone) throw new Error("The answer stream ended before the response was complete.");
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : "The RAG API is unavailable.");
+      setResponse((current) => current?.answer ? current : null);
     } finally {
       setLoading(false);
     }
@@ -69,15 +94,15 @@ export default function Home() {
       <section className="results-layout" aria-live="polite">
         <div className="answer-column">
           <div className="section-label"><span>Grounded answer</span><span>{response ? "READY" : "WAITING"}</span></div>
-          {loading && <div className="state-panel loading-state"><span className="loader" /><div><strong>Searching the live corpus</strong><p>Embedding your question and ranking matching chunks.</p></div></div>}
+          {loading && <div className="state-panel loading-state"><span className="loader" /><div><strong>{response?.answer ? "Writing from the evidence" : "Searching the live corpus"}</strong><p>{response?.answer ? "Answer tokens are arriving progressively." : "Embedding your question and ranking matching chunks."}</p></div></div>}
           {error && <div className="state-panel error-state"><strong>Could not retrieve an answer</strong><p>{error}</p><button type="button" onClick={() => setError("")}>Dismiss</button></div>}
-          {!loading && !error && !response && <div className="empty-answer"><span>↳</span><p>Your answer will appear here with its evidence trail.</p></div>}
-          {!loading && !error && response && <article className="answer-card"><div className="answer-marker">A / 01</div><p>{response.answer}</p><footer><span>Generated from {response.results.length} retrieved {response.results.length === 1 ? "source" : "sources"}</span><span className="verified">● GROUNDED</span></footer></article>}
+          {!response && !loading && !error && <div className="empty-answer"><span>↳</span><p>Your answer will appear here with its evidence trail.</p></div>}
+          {response && <article className="answer-card"><div className="answer-marker">A / 01 / STREAMING</div><p>{response.answer}{loading && <span className="typing-cursor" aria-label="Answer is still streaming">▌</span>}</p><footer><span>Generated from {response.results.length} retrieved {response.results.length === 1 ? "source" : "sources"}</span><span className="verified">● {loading ? "STREAMING" : "GROUNDED"}</span></footer></article>}
         </div>
 
         <aside className="sources-column" aria-labelledby="sources-title">
           <div className="section-label"><span id="sources-title">Retrieved sources</span><span>{response?.results.length || 0} MATCHES</span></div>
-          {response?.results.map((source, index) => <article className="source-card" key={source.chunk_id || `${source.metadata.source_document}-${index}`}><div className="source-heading"><span className="source-number">0{index + 1}</span><span className="source-score">{source.score === null ? "—" : `${Math.round(source.score * 100)}% match`}</span></div><h3>{source.metadata.source_document || "Indexed document"}</h3><p className="chunk-id">{source.chunk_id || `chunk-${source.metadata.chunk_index ?? index}`}</p><p>{source.text}</p><div className="source-meta"><span>Chunk {source.metadata.chunk_index ?? index}</span><span>Evidence</span></div></article>)}
+          {response?.results.map((source, index) => <details className="source-card" key={source.chunk_id || `${source.metadata.source_document}-${index}`} open={index === 0}><summary><div className="source-heading"><span className="source-number">[{index + 1}]</span><span className="source-score">{source.score === null ? "—" : `${Math.round(source.score * 100)}% match`}</span></div><h3>{source.metadata.source_document || "Indexed document"}</h3><p className="chunk-id">{source.chunk_id || `chunk-${source.metadata.chunk_index ?? index}`}</p></summary><p className="source-content">{source.text}</p><div className="source-meta"><span>Chunk {source.metadata.chunk_index ?? index}</span><span>Click to collapse</span></div></details>)}
           {!response && <div className="sources-placeholder">Sources will be listed beside the answer after a query.</div>}
         </aside>
       </section>
