@@ -1,161 +1,151 @@
 // backend/index.js
 require('dotenv').config();
 const express = require('express');
-const multer = require('multer');
-const { prepareMessagesForLLM } = require('./historyManager');
-const { RuntimeKnowledgeBase, UploadError, DEFAULT_MAX_BYTES } = require('./runtimeKnowledgeBase');
+const crypto = require('crypto');
+const fs = require('fs');
 
 const app = express();
 app.use(express.json());
-const knowledgeBase = new RuntimeKnowledgeBase();
-const upload = multer({
-    storage: multer.memoryStorage(),
-    limits: { fileSize: DEFAULT_MAX_BYTES },
-});
 
-function receiveUpload(req, res, next) {
-    upload.single('document')(req, res, (error) => {
-        if (!error) return next();
-        if (error.code === 'LIMIT_FILE_SIZE') {
-            return res.status(413).json({ error: `The uploaded document exceeds the ${DEFAULT_MAX_BYTES} byte limit` });
-        }
-        return res.status(400).json({ error: error.message || 'Invalid multipart upload' });
-    });
+const PORT = process.env.PORT || 5000;
+const LOG_FILE = 'usage_log.json';
+
+// --- Observability Constants ---
+// Output tokens often cost 3x to 10x more than input tokens.
+const MODEL_INPUT_COST_PER_1K = 0.00015;
+const MODEL_OUTPUT_COST_PER_1K = 0.00060;
+const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
+
+// In-memory cache store
+const queryCache = {};
+
+// --- Helper Functions ---
+function generateCacheKey(question) {
+    return crypto.createHash('sha256').update(question.trim().toLowerCase()).digest('hex');
 }
 
-app.post('/api/upload', receiveUpload, async (req, res) => {
-    try {
-        const summary = await knowledgeBase.ingest(req.file);
-        res.status(201).json({ message: 'Document uploaded, embedded, and indexed', ...summary });
-    } catch (error) {
-        const statusCode = error instanceof UploadError ? error.statusCode : 500;
-        res.status(statusCode).json({ error: error.message || 'Document processing failed' });
+function estimateTokens(text) {
+    // Rough estimation: 1 token ~= 4 characters
+    return Math.ceil(text.length / 4);
+}
+
+function calculateCost(inputTokens, outputTokens) {
+    const inputCost = (inputTokens / 1000) * MODEL_INPUT_COST_PER_1K;
+    const outputCost = (outputTokens / 1000) * MODEL_OUTPUT_COST_PER_1K;
+    return inputCost + outputCost; //
+}
+
+function logRequest(record) {
+    let logs = [];
+    if (fs.existsSync(LOG_FILE)) {
+        logs = JSON.parse(fs.readFileSync(LOG_FILE, 'utf8'));
     }
-});
+    logs.push(record);
+    fs.writeFileSync(LOG_FILE, JSON.stringify(logs, null, 2));
+}
 
-app.post('/api/query', async (req, res) => {
-    try {
-        const results = await knowledgeBase.search(req.body?.query, req.body?.k || 5);
-        res.json({ query: req.body.query, results });
-    } catch (error) {
-        const statusCode = error instanceof UploadError ? error.statusCode : 500;
-        res.status(statusCode).json({ error: error.message || 'Query failed' });
-    }
-});
-
-// --- Load Config from Environment (Task 4) ---
-const PORT = process.env.PORT || 5000;
-const VECTOR_DB_URL = process.env.VECTOR_DB_URL || "http://localhost:8000";
-
-
-// ==========================================
-// ROUTE 1: Context History Manager (Mod 3.15)
-// ==========================================
-app.post('/api/chat', async (req, res) => {
-    try {
-        const { query, history } = req.body;
-
-        if (!query) {
-            return res.status(400).json({ error: "Query is required" });
-        }
-
-        // 1. Process the history and query to ensure it fits the token limit
-        const safePayload = prepareMessagesForLLM(query, history || [], 3000);
-
-        // 2. Log the payload to verify the system prompt is intact and old history is trimmed
-        console.log("Final Payload to LLM:", JSON.stringify(safePayload, null, 2));
-
-        // 3. (Future Step) Send safePayload to OpenAI/Anthropic API here
-        
-        res.json({ 
-            message: "Context window managed successfully.",
-            payloadSentToModel: safePayload
-        });
-
-    } catch (error) {
-        console.error("Error processing chat:", error);
-        res.status(500).json({ error: "Internal server error" });
-    }
-});
-
-
-// ==========================================
-// ROUTE 2: RAG Pipeline API (Mod 3.44)
-// ==========================================
-
-// Mock RAG Pipeline (Integrates concepts from 3.37 - 3.43)
+// --- MOCK RAG PIPELINE ---
 async function runRagPipeline(question) {
-    // Simulate pipeline latency
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(resolve, 600)); // Simulate latency
     
     if (question.toLowerCase().includes("submission")) {
         return {
             answer: "The submission requires a PR link, sample output, and a video explanation.",
-            sources: [
-                { source: "submission-rubric.md", chunk_id: "submission-rubric.md:2", score: 0.84 }
-            ],
-            status: "answered"
+            sources: [{ source: "submission-rubric.md", score: 0.84 }]
         };
     }
-    
-    // Simulate failing guardrails if the question is unrelated
     return {
         answer: "I do not have enough verified protocol information to answer this.",
-        sources: [],
-        status: "refused"
+        sources: []
     };
 }
 
-// Task 1: Create query endpoint
+// --- TASK 1, 2 & 3: THE QUERY ENDPOINT ---
 app.post('/api/query', async (req, res) => {
-    try {
-        const { question } = req.body;
+    const startTime = Date.now();
+    const { question } = req.body;
 
-        // Task 3: Validate Input
-        if (!question || typeof question !== 'string') {
-            return res.status(400).json({ 
-                error: "Bad Request", 
-                detail: "'question' field is required and must be a string." 
-            });
-        }
-        if (question.length < 3 || question.length > 1000) {
-            return res.status(400).json({ 
-                error: "Bad Request", 
-                detail: "Question must be between 3 and 1000 characters." 
-            });
-        }
-
-        // Execute Pipeline
-        const result = await runRagPipeline(question);
-
-        // Task 2: Return Structured JSON
-        const responsePayload = {
-            answer: result.answer,
-            sources: result.sources.map(s => ({
-                source: s.source,
-                chunk_id: s.chunk_id || null,
-                score: s.score || null
-            })),
-            status: result.status
-        };
-
-        return res.status(200).json(responsePayload);
-
-    } catch (error) {
-        // Task 3: Handle Server Errors
-        console.error("RAG Service Error:", error);
-        return res.status(500).json({ 
-            error: "Internal Server Error", 
-            detail: "The RAG service failed to process the request." 
-        });
+    if (!question || typeof question !== 'string') {
+        return res.status(400).json({ error: "Bad Request", detail: "Invalid question format." });
     }
+
+    const cacheKey = generateCacheKey(question);
+    const cachedEntry = queryCache[cacheKey];
+    let isCacheHit = false;
+    let result;
+
+    // Task 1: Check Cache
+    if (cachedEntry && (Date.now() - cachedEntry.createdAt < CACHE_TTL_MS)) {
+        result = cachedEntry.response;
+        isCacheHit = true;
+    } else {
+        // Run Pipeline if cache miss
+        result = await runRagPipeline(question);
+        queryCache[cacheKey] = {
+            createdAt: Date.now(),
+            response: result
+        };
+    }
+
+    const latency = Date.now() - startTime;
+    const inputTokens = estimateTokens(question);
+    const outputTokens = estimateTokens(result.answer);
+    const estimatedCost = calculateCost(inputTokens, outputTokens);
+
+    // Task 2 & 3: Structured Logging and Cost Tracking
+    const logEntry = {
+        timestamp: new Date().toISOString(),
+        request_id: crypto.randomUUID(),
+        question: question,
+        answer_preview: result.answer.substring(0, 100),
+        sources: result.sources.map(s => s.source),
+        cache_hit: isCacheHit,
+        input_tokens: inputTokens,
+        output_tokens: outputTokens,
+        estimated_cost: estimatedCost,
+        latency_ms: latency
+    };
+    
+    logRequest(logEntry);
+
+    return res.status(200).json({
+        answer: result.answer,
+        sources: result.sources,
+        usage: {
+            cache_hit: isCacheHit,
+            input_tokens: inputTokens,
+            output_tokens: outputTokens,
+            estimated_cost_usd: estimatedCost.toFixed(6)
+        }
+    });
 });
 
+// --- TASK 4: USAGE REPORT ENDPOINT ---
+app.get('/api/usage-report', (req, res) => {
+    if (!fs.existsSync(LOG_FILE)) {
+        return res.json({ message: "No usage logs found." });
+    }
 
-// ==========================================
-// SERVER INITIALIZATION
-// ==========================================
+    const logs = JSON.parse(fs.readFileSync(LOG_FILE, 'utf8'));
+    const totalRequests = logs.length;
+    const cacheHits = logs.filter(l => l.cache_hit).length;
+    const totalCost = logs.reduce((sum, l) => sum + l.estimated_cost, 0);
+    const avgLatency = logs.reduce((sum, l) => sum + l.latency_ms, 0) / totalRequests;
+
+    const summary = {
+        total_requests: totalRequests,
+        cache_hits: cacheHits,
+        cache_hit_rate: (cacheHits / totalRequests).toFixed(2),
+        total_estimated_cost_usd: totalCost.toFixed(6),
+        average_latency_ms: avgLatency.toFixed(2)
+    };
+
+    // Save summary artifact for assignment submission
+    fs.writeFileSync('usage_summary.json', JSON.stringify(summary, null, 2));
+
+    return res.json(summary);
+});
+
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-    console.log(`Connected to Vector DB at ${VECTOR_DB_URL}`);
+    console.log(`ClinTrace Observability API running on port ${PORT}`);
 });
