@@ -35,3 +35,4 @@ The shared template lives in [backend/prompts/answer.js](backend/prompts/answer.
 Run `py scripts/document_loader.py data --output scripts/document-loading-report.json` to recursively load PDF, TXT, Markdown, and HTML files into plain-text records. Each loaded record keeps its filename, path, format, and text; unreadable or unsupported files are recorded in `skipped` so one bad document does not stop the corpus. The command reports character counts and an 80-character sample for intake verification. Install dependencies with `py -m pip install -r requirements-token-counting.txt`. The checked-in [scripts/document-loading-sample-output.json](scripts/document-loading-sample-output.json) shows the expected loaded and skipped report shape.
  LLM 
  API 
+ LLM API
